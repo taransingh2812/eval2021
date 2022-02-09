@@ -1,0 +1,69 @@
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+body{
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center;
+  
+  margin: 10%;
+  
+  background-image: url("wall.jpeg");
+  background-repeat: no-repeat;
+  background-size: 100% 200%;
+  font-size:x-large;
+   
+}
+
+#recentTrans{
+  width:100px;
+  height:100px;
+}
+
+#recentTrans > img{
+  width: 100%;
+  height:100%;
+  margin-left: 400%;
+}
+#importss{
+  text-align: center;
+}
+
+#second{
+  font-size:smaller;
+}
+
+body div, h1, h2, h3{
+  margin: 10px;
+  background-color:transparent;
+  color:gold;
+}
+input{
+  font-size:25px;
+  background-color: transparent;
+  color: bisque;
+  
+}
+
+#bigTable{
+  border: 2px solid black;
+  padding: 10px;
+}
+
+tr,td,th{ width: auto;
+height:10px;}
+
+
+#rows{
+  border: 2px solid yellowgreen;
+  padding: 5px;
+}
+
+#items{
+  border: 2px solid crimson;
+  padding: 5px;
+}
+
+
