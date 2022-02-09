@@ -368,9 +368,8 @@ include "connect.php";
 <br><br>
 
 <div id="recentTrans">
-    <img src="frame.png" alt="QR CODE"/>
-    <span id="allData">
-    </span>
+    <img src="653684EF-6527-4261-899A-7DA7827B4094.jpeg" alt="QR CODE"/>
+   
     </div>
 </div>
 </body>
