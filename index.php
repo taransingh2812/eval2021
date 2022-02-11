@@ -1,5 +1,6 @@
 <?php
 include "connect.php";
+
 ?>
 
 <!DOCTYPE html>
@@ -9,7 +10,7 @@ include "connect.php";
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-   
+    <script src="require.js"></script>
     <link href="style.css" rel="stylesheet"/>
 
    <script>
@@ -36,7 +37,7 @@ include "connect.php";
             let toAdd = document.getElementById('toAdd').value;
             let amtAdd = 0;
             amtAdd = document.getElementById('amt').value;
-
+            
             let val =  await checkValidAddress(toAdd);
             if(val===0){return;}
             
@@ -134,13 +135,16 @@ include "connect.php";
                     }
                     else if(code===2)
                     {   // this address is the receiver's address
-                        let hashV = await transferAmt(addr,amount);
-                        console.log(hashV);
-                        await addDatabase(ipadd,addr,amount,hashV); 
-                              
-                         document.getElementById("statusBar").style.backgroundColor="lightgreen";
+                        let hashValue= await transferAmt(addr,amount);
+                        console.log(hashValue);
+                        let ret = await addDatabase(ipadd,addr,amount/100,hashValue); 
+                           
+                        if(ret===1)
+                        { document.getElementById("statusBar").style.backgroundColor="lightgreen";
                          document.getElementById("statusBar").innerHTML = "Transaction was Successful";
-                                    //insert it to the database
+                         balanceRetrieve();
+                        }           //insert it to the database
+                      
                     }
                     else if(code===-1)
                     {
@@ -153,15 +157,16 @@ include "connect.php";
                     }
                     else if(code===0)
                     { //ipadd,addr,amount,hash
-                        var data = {"address": addr, "amount": amount};
-                        
-                        let hashV = await transferAmt(addr,amount);
-                        await addDatabase(ipadd,addr,amount,hashV); 
-                        console.log(hashV);
+                   
+                        let hashValue= await transferAmt(addr,amount);
+                        let ret = await addDatabase(ipadd,addr,amount/100,hashValue); 
+                        console.log(hashValue);
                          
+                        if(ret===1){
                         document.getElementById("statusBar").style.backgroundColor="lightgreen";
                         document.getElementById("statusBar").innerHTML = "Transaction was Successful";
-                              
+                        balanceRetrieve();
+                        }
                                     //update it to the database
                     }
                 })
@@ -172,33 +177,32 @@ include "connect.php";
         async function transferAmt(sendTo,toTransfer)
         {   
             var hashR = "";
-            
+            toTransfer = toTransfer/100;
             var newtx = {inputs: [{addresses: [address]}],
                 outputs: [{addresses: [sendTo], value: toTransfer}]};
 
             await $.post('https://api.blockcypher.com/v1/btc/test3/txs/new', JSON.stringify(newtx))
             .then(async response=>{
 
-                if (!response.ok) {
+                if (response.ok) {
                     // get error message from body or default to response status
-                    const error = (data && data.message) || response.status;
                     document.getElementById("statusBar").style.visibility="visible";
                     document.getElementById("statusBar").style.backgroundColor="red";
                     document.getElementById("statusBar").innerHTML = "Something Went WRONG";
                     return "Something Went WRONG";    
                 }
                 return response.json();
-            }).then(async function(code){
+            }).then(function(code){
                     console.log(code); 
                     hashR = code.tx.hash;
-                    await balanceRetrieve(); // add output address parameter on this function
+                     // add output address parameter on this function
                 })
                 return hashR;    
         }
          
          async function balanceRetrieve(){
              let a = 0;
-          await  $.get('https://api.blockcypher.com/v1/btc/test3/addrs/'+ address +'/balance' )
+          await $.get('https://api.blockcypher.com/v1/btc/test3/addrs/'+ address +'/balance' )
                 .then(function(code){
                 
                     console.log(code);
@@ -223,20 +227,21 @@ include "connect.php";
 
         //adding the recent stuff to the database named Recents
         //using insert.php
-    async function addDatabase(ipadd,addr,amount,hashV)
+    async function addDatabase(ipadd,addr,amount,hashValue)
     {
-        let url = 'insert.php?ipaddress='+ ipadd + '&address=' + addr + 
-                '&amount=' + amount+ '&hash='+ hashV;
-                console.log(url);
-         
-                await $.get(url).then(function(code)
-                     {
-                        if(!status(200)){
-                        document.getElementById("statusBar").innerHTML = "Something Went WRONG";
-                        return ;
-                        }
-                         console.log(code); 
-                    })
+        let url = 'insert.php?ipaddress='+ ipadd + '&address=' + addr +'&amount=' + amount+ '&hashValue='+ hashValue;
+        console.log(url);
+        let re=0;
+
+              fetch(url, {credentials:'include'})
+              .then(response=>response.json())
+                .then(function(code){
+                    console.log(url);
+                    re=code;
+                    console.log(re);
+                })
+                return re;
+                 
     }
     
     
@@ -324,7 +329,7 @@ include "connect.php";
         function deleteWallet()
         {
             $.ajax({
-            url: "https://api.blockcypher.com/v1/btc/main/wallets/Taran?token="+ TOKEN,
+            url: "https://api.blockcypher.com/v1/btc/test3/wallets/Taran?token="+ TOKEN,
             method: "DELETE"}).then(function(){
                 console.log("Wallet Deleted");
             })    
@@ -338,7 +343,6 @@ include "connect.php";
          * mvhQ4ipandBCDKkhUnPnRUe8sKR9nkRirb , 
          * mp7JHu2GvBBnFKG34SrUhhFEEuKsszr69x
          */
-
        </script>
 
     <title>Wallet</title>
@@ -369,7 +373,8 @@ include "connect.php";
 
 <div id="recentTrans">
     <img src="653684EF-6527-4261-899A-7DA7827B4094.jpeg" alt="QR CODE"/>
-   
+    <span id="allData">
+    </span>
     </div>
 </div>
 </body>
